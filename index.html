@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Una Página de Cacao</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #f5f0eb;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 60px 40px 48px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.8rem);
+    font-weight: 700;
+    color: #1a1410;
+    letter-spacing: 0.02em;
+  }
+
+  .visit-counter {
+    white-space: nowrap;
+    font-size: 13px;
+    color: #6b5f54;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  .visit-counter span {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: #1a1410;
+    display: block;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .gallery {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  .photo-card {
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+
+  .photo-card img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease, opacity 0.35s ease;
+  }
+
+  .photo-card:hover img {
+    transform: scale(1.04);
+    opacity: 0.92;
+  }
+
+  /* ── LIGHTBOX ── */
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,20,16,0.93);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  #lightbox.open {
+    display: flex;
+    animation: lbIn 0.2s ease;
+  }
+
+  @keyframes lbIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  #lightbox img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 2px;
+  }
+
+  #lightbox .lb-close {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    background: none;
+    border: none;
+    color: #e8e0d8;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  #lightbox .lb-close:hover { opacity: 1; }
+
+  @media (max-width: 600px) {
+    header { padding: 40px 20px 36px; }
+    .gallery { padding: 0 12px 60px; gap: 8px; grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>UNA PAGINA DE CACAO</h1>
+  <div class="visit-counter">
+    <span id="visit-count">—</span>
+    visitas
+  </div>
+</header>
+
+<div class="gallery" id="gallery"></div>
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button class="lb-close" onclick="closeLightbox()">×</button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  ✏️  TUS FOTOS VAN AQUÍ
+//  Para cada foto:
+//    src:  ruta de la imagen o URL
+//    date: fecha en formato YYYY-MM-DD (para el orden)
+// ══════════════════════════════════════════════════
+const photos = [
+  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800", date: "2024-07-14" },
+  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800", date: "2024-03-22" },
+  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800", date: "2023-11-05" },
+  { src: "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=800", date: "2023-08-18" },
+  { src: "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=800", date: "2023-04-02" },
+  { src: "https://images.unsplash.com/photo-1414609245224-aea4f3571563?w=800", date: "2022-12-25" },
+  { src: "https://images.unsplash.com/photo-1443890923422-7819ed4101c0?w=800", date: "2022-09-10" },
+  { src: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800", date: "2022-05-01" },
+];
+// ══════════════════════════════════════════════════
+
+const sorted = [...photos].sort((a, b) => b.date.localeCompare(a.date));
+const gallery = document.getElementById('gallery');
+
+gallery.innerHTML = sorted.map(p => `
+  <div class="photo-card" onclick="openLightbox('${p.src}')">
+    <img src="${p.src}" alt="" loading="lazy">
+  </div>
+`).join('');
+
+function openLightbox(src) {
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lb-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox({ target: document.getElementById('lightbox') });
+});
+
+// ── CONTADOR DE VISITAS ──────────────────────────
+// Usa countapi.xyz — gratuito, sin registro
+// Cambiá "mi-galeria-cacao" por un nombre único tuyo
+fetch("https://api.countapi.xyz/hit/una-pagina-de-cacao/mi-galeria-cacao")
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('visit-count').textContent =
+      data.value.toLocaleString('es');
+  })
+  .catch(() => {
+    document.getElementById('visit-count').textContent = '—';
+  });
+</script>
+</body>
+</html>
