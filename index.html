@@ -79,6 +79,27 @@
     opacity: 0.92;
   }
 
+  .photo-label {
+    padding: 7px 4px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .photo-label .num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #6b5f54;
+  }
+
+  .photo-label .date {
+    font-size: 11px;
+    color: #a09088;
+    letter-spacing: 0.06em;
+  }
+
   /* ── LIGHTBOX ── */
   #lightbox {
     display: none;
@@ -632,9 +653,19 @@ const photos = [  { src: "fotos/c55c4a91-5d83-41db-8513-5e8c556f289d.jpg", date:
 const sorted = [...photos].sort((a, b) => a.date.localeCompare(b.date));
 const gallery = document.getElementById('gallery');
 
-gallery.innerHTML = sorted.map(p => `
+function formatDate(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+gallery.innerHTML = sorted.map((p, i) => `
   <div class="photo-card" onclick="openLightbox('${p.src}')">
     <img src="${p.src}" alt="" loading="lazy">
+    <div class="photo-label">
+      <span class="num">#${i + 1}</span>
+      <span class="date">${formatDate(p.date)}</span>
+    </div>
   </div>
 `).join('');
 
