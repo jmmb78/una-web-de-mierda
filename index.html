@@ -686,17 +686,18 @@ document.addEventListener('keydown', e => {
 });
 
 // ── CONTADOR DE VISITAS ──────────────────────────
-// Usa countapi.xyz — gratuito, sin registro
-// Cambiá "mi-galeria-cacao" por un nombre único tuyo
-fetch("https://api.countapi.xyz/hit/una-pagina-de-cacao/mi-galeria-cacao")
+// Contador GoatCounter
+fetch("https://jmmb78.goatcounter.com/counter/unawebdemierda.com.json")
   .then(r => r.json())
   .then(data => {
     document.getElementById('visit-count').textContent =
-      data.value.toLocaleString('es');
+      data.count.toLocaleString('es');
   })
   .catch(() => {
     document.getElementById('visit-count').textContent = '—';
   });
 </script>
+
+<script data-goatcounter="https://jmmb78.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
