@@ -1,0 +1,44 @@
+name: Actualizar photos.json
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "fotos/**"
+      - "scripts/generate-photos.mjs"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # necesario para leer el historial (fecha del primer commit de cada foto)
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Generar photos.json
+        run: node scripts/generate-photos.mjs
+
+      - name: Commit si hay cambios
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- photos.json; then
+            echo "photos.json sin cambios, nada que commitear."
+          else
+            git add photos.json
+            git commit -m "chore: actualizar photos.json [skip ci]"
+            git push
+          fi
