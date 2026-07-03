@@ -1,0 +1,11 @@
+{
+  "name": "una-web-de-mierda",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate-photos": "node scripts/generate-photos.mjs"
+  },
+  "dependencies": {
+    "exifr": "^7.1.3"
+  }
+}
